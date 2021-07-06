@@ -1,0 +1,17 @@
+{
+  "name": "phonebook_api",
+  "version": "1.0.0",
+  "description": "API for phonebook flutter application",
+  "main": "index.js",
+  "scripts": {
+      "start": "nodemon app.js"
+  },
+  "author": "Daniel Canada",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.13.2",
+    "nodemon": "^2.0.9"
+  }
+}
