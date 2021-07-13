@@ -37,7 +37,9 @@ class _DataFromAPIState extends State<DataFromAPI> {
   @override
   void initState(){
     super.initState();
-    getContactData();
+    setState(() {
+      getContactData();
+    });
   }
 
   //get Contacts from DB
@@ -61,10 +63,10 @@ class _DataFromAPIState extends State<DataFromAPI> {
   }
 
   Widget phoneNumbersList(AsyncSnapshot<dynamic> snapshot,int index){
-    return new Container(
-      child: Column(
-        children: snapshot.data[index].phoneNumbers.map<Widget>((x) => Text(x, style: TextStyle(fontWeight: FontWeight.w500),)).toList(),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      verticalDirection: VerticalDirection.down,
+      children: snapshot.data[index].phoneNumbers.map<Widget>((x) => Text(x, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)).toList(),
     );
   }
 
@@ -73,7 +75,7 @@ class _DataFromAPIState extends State<DataFromAPI> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("Contact Lists", style: TextStyle(fontSize: 22),),
+        title: Text("Contacts", style: TextStyle(fontSize: 22),),
         actions: [
           TextButton(
             onPressed: () {
@@ -94,134 +96,127 @@ class _DataFromAPIState extends State<DataFromAPI> {
         ],
       ),
       body: Center(
-          child: Container(
-            child: FutureBuilder(
-              future: getContactData(),
-              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot){
-                if(snapshot.data == null){
-                  return Container(
-                    child: Center(
-                      child: Text('Loading...'),
-                    ),
-                  );
-                }else
-                  return ListView.builder(itemCount: snapshot.data.length,
-                      itemBuilder: (context, index){
-                        return Dismissible(
-                          direction: DismissDirection.endToStart,
-                          key: Key(snapshot.data[index].id),
-                          onDismissed: (direction) {
-                            String contactName = (snapshot.data[index].firstName.toString() + ' ' + snapshot.data[index].lastName.toString());
-                            deleteContactData(snapshot.data[index].id);
-                            setState(() {
-                              snapshot.data.removeAt(index);
-                            });
-                            // Then show a snackbar.
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(SnackBar(content: Text('Contact: $contactName deleted')));
-                          },
-                          //confirmation
-                          confirmDismiss: (DismissDirection direction) async{
-                            return await showDialog(context: context, builder: (context) {
-                              return AlertDialog(
-                                title: const Text("Delete?"),
-                                //content: const Text('Delete contact?'),
-                                actions: [
-                                  TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop(false);
-                                      },
-                                      child: const Text('Cancel')),
-                                  TextButton(
-                                      onPressed: (){
-                                        Navigator.of(context).pop(true);
-                                        setState(() {
-                                          getContactData();
-                                        });
-                                      },
-                                      child: const Text('Delete'))
-                                ],
-                              );
-                            });
-                          },
-                          // Show a red background as the item is swiped away.
-                          background: Container(
-                            alignment: AlignmentDirectional.centerEnd,
-                            color: Colors.red,
-                            child: Padding(
-                              padding: EdgeInsets.fromLTRB(0.0, 0.0, 10.0, 0.0),
-                              child: Icon(Icons.delete,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                          child: GestureDetector(
-                            onTap: (){
-                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => UpdateContactPage(id: snapshot.data[index].id.toString())));
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+            child: Container(
+              child: FutureBuilder(
+                future: getContactData(),
+                builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot){
+                  if(snapshot.data == null){
+                    return Container(
+                      child: Center(
+                        child: Text('Loading...'),
+                      ),
+                    );
+                  }else
+                    return ListView.builder(itemCount: snapshot.data.length,
+                        itemBuilder: (context, index){
+                          return Dismissible(
+                            direction: DismissDirection.endToStart,
+                            key: Key(snapshot.data[index].id),
+                            onDismissed: (direction) {
+                              String contactName = (snapshot.data[index].firstName.toString() + ' ' + snapshot.data[index].lastName.toString());
+                              deleteContactData(snapshot.data[index].id);
+                              setState(() {
+                                snapshot.data.removeAt(index);
+                              });
+                              // Then show a snackbar.
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(content: Text('Contact: $contactName deleted')));
                             },
-                            child: Card(
-                              margin: EdgeInsets.only(top: 10),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  children: <Widget>[
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                            flex: 2,
-                                            child: Row(
-                                              children: [
-                                                Expanded(
-                                                  flex: 1,
-                                                  child: Row(
-                                                    children: [
-                                                      SizedBox(width: 12.0),
-                                                      TextButton(
-                                                        onPressed: (){
-                                                          Navigator.of(context).push(MaterialPageRoute(builder: (context) => UpdateContactPage(id: snapshot.data[index].id.toString())));
-                                                        },
-                                                        child: CircleAvatar(
-                                                          backgroundColor: Colors.primaries[Random().nextInt(Colors.primaries.length)],
-                                                          radius: 25.0,
-                                                          child: Text(snapshot.data[index].firstName[0] + snapshot.data[index].lastName[0],
-                                                              style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                Expanded(
-                                                  flex: 2,
-                                                  child: Row(
-                                                    children: [
-                                                      Text(snapshot.data[index].firstName + ' ' + snapshot.data[index].lastName,
-                                                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            )
-                                        ),
-                                        Expanded(
-                                          flex: 1,
-                                          child: Column(
-                                            children: [
-                                              Text('Phone Numbers: ', style: TextStyle(fontWeight: FontWeight.w500)),
-                                              phoneNumbersList(snapshot,index)
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                            //confirmation
+                            confirmDismiss: (DismissDirection direction) async{
+                              return await showDialog(context: context, builder: (context) {
+                                return AlertDialog(
+                                  title: const Text("Delete?"),
+                                  //content: const Text('Delete contact?'),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop(false);
+                                        },
+                                        child: const Text('Cancel')),
+                                    TextButton(
+                                        onPressed: (){
+                                          Navigator.of(context).pop(true);
+                                          setState(() {
+                                            getContactData();
+                                          });
+                                        },
+                                        child: const Text('Delete'))
                                   ],
+                                );
+                              });
+                            },
+                            // Show a red background as the item is swiped away.
+                            background: Container(
+                              alignment: AlignmentDirectional.centerEnd,
+                              color: Colors.red,
+                              child: Padding(
+                                padding: EdgeInsets.fromLTRB(0.0, 0.0, 10.0, 0.0),
+                                child: Icon(Icons.delete,
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      });
-              },
+                            child: GestureDetector(
+                              onTap: (){
+                                Navigator.of(context).push(MaterialPageRoute(builder: (context) => UpdateContactPage(id: snapshot.data[index].id.toString())));
+                              },
+                              child: Card(
+                                margin: EdgeInsets.only(top: 5, bottom: 5),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    children: <Widget>[
+                                      Row(
+                                        children: [
+                                          SizedBox(width: 8.0),
+                                          CircleAvatar(
+                                            backgroundColor: Colors.primaries[Random().nextInt(Colors.primaries.length)],
+                                            radius: 30.0,
+                                            child: Text(snapshot.data[index].firstName[0] + snapshot.data[index].lastName[0],
+                                                style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)),
+                                          ),
+                                          SizedBox(width: 18.0),
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,  verticalDirection: VerticalDirection.down,
+                                            children: [
+                                              Text(snapshot.data[index].firstName + ' ' + snapshot.data[index].lastName,
+                                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,),
+                                              ),
+                                              SizedBox(height: 4),
+                                              Container(
+                                                color: Colors.black,
+                                                height: 1.5,
+                                                width: 230,
+                                              ),
+                                              SizedBox(height: 4),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                verticalDirection: VerticalDirection.down,
+                                                children: [
+                                                  Text("Phone Numbers: ",
+                                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                                                  ),
+                                                  SizedBox(width: 5),
+                                                  phoneNumbersList(snapshot, index),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        });
+                },
+              ),
             ),
           )
       ),
