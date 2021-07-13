@@ -158,7 +158,7 @@ class _NewContactState extends State<NewContact> {
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Container(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(10.0),
           //key: formKey,
           child: Column(
             children: [
