@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'contactModel.dart';
 
-
 class NewContact extends StatefulWidget {
 
   @override
